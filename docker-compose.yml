@@ -1,0 +1,10 @@
+# Local dev orchestration for the portfolio.
+# Services get added here as they're built.
+
+services:
+  web:
+    build: ./apps/web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
