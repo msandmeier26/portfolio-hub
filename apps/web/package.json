@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "next build && wrangler pages deploy out --project-name=portfolio-hub --branch=main"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.6",
@@ -25,6 +26,7 @@
     "eslint-config-next": "16.2.4",
     "openapi-typescript-codegen": "^0.30.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.88.0"
   }
 }

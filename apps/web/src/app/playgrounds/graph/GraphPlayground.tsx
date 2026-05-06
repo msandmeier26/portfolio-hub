@@ -758,7 +758,7 @@ export default function GraphPlayground() {
                 )}
               </div>
               <label className="block text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-                Speed: {speedMs}ms / step
+                Step Duration: {speedMs}ms / step
               </label>
               <input
                 type="range"
