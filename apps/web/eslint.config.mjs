@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored / generated runtime assets served from /public:
+    "public/services/**",
   ]),
 ]);
 

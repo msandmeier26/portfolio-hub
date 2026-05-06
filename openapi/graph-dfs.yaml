@@ -1,0 +1,110 @@
+openapi: 3.0.3
+info:
+  title: Graph DFS Service
+  version: 0.1.0
+  description: |
+    Depth-first search over a directed or undirected graph.
+    Returns the per-vertex DFS traces (edge & vertex order), a global
+    visit order, and the ordered edge sequence used by the frontend
+    to animate a DFS starting from a chosen vertex.
+
+    The OpenAPI form documents the JSON shape; the service is actually
+    delivered as a WebAssembly module loaded client-side. The embind-bound
+    function
+
+        std::string runDFS(const std::string& request_json);
+
+    consumes a `DfsRequest` and returns a `DfsResponse`. See
+    `services/graph-dfs/README.md` and
+    `apps/web/src/lib/graph/dfsService.ts` for the loader and Emscripten
+    build flags.
+servers:
+  - url: http://localhost:8080
+    description: Reference HTTP server (not used in production — service runs in the browser as WASM)
+paths:
+  /dfs:
+    post:
+      operationId: runDfs
+      summary: Run DFS on a graph
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DfsRequest'
+      responses:
+        '200':
+          description: DFS traces for the supplied graph
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DfsResponse'
+        '400':
+          description: Malformed graph (e.g. edge references unknown vertex)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Edge:
+      type: object
+      required: [from, to]
+      properties:
+        from: { type: string }
+        to:   { type: string }
+        weight:
+          type: number
+          default: 1
+    DfsRequest:
+      type: object
+      required: [vertices, edges, directed]
+      properties:
+        directed:
+          type: boolean
+          description: If false, every edge is treated as bidirectional.
+        vertices:
+          type: array
+          items: { type: string }
+          description: Vertex labels. Order is preserved and used as tie-break for neighbour iteration.
+        edges:
+          type: array
+          items: { $ref: '#/components/schemas/Edge' }
+        startVertex:
+          type: string
+          description: |
+            Vertex to start the animated DFS from. If omitted, the first vertex
+            in `vertices` is used.
+    DfsResponse:
+      type: object
+      required: [edgeStepsFromStart, vertexTraces, edgeTraces, visitOrder]
+      properties:
+        edgeStepsFromStart:
+          type: array
+          description: Ordered edges traversed by DFS from startVertex. The frontend animates these one at a time.
+          items: { $ref: '#/components/schemas/Edge' }
+        vertexStepsFromStart:
+          type: array
+          description: Ordered vertices visited by DFS from startVertex (includes startVertex first).
+          items: { type: string }
+        vertexTraces:
+          type: object
+          description: For each vertex, the vertex order produced by DFS starting there.
+          additionalProperties:
+            type: array
+            items: { type: string }
+        edgeTraces:
+          type: object
+          description: For each vertex, the edge order produced by DFS starting there.
+          additionalProperties:
+            type: array
+            items: { $ref: '#/components/schemas/Edge' }
+        visitOrder:
+          type: array
+          description: Classical DFS visit order, restarting from a fresh vertex when the current component is exhausted.
+          items: { type: string }
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
