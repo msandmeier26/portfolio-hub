@@ -400,16 +400,21 @@ export default function GraphPlayground() {
     }
   };
 
-  // Derived state for animation highlighting
+  // Derived state for animation highlighting.
+  // In undirected mode, DFS may traverse a stored edge {A,B} from B to A and
+  // record the step as {from:B,to:A}; the rendered edge still has key A->B.
+  // We register both orientations so the animation paints either side.
   const traversedEdges = useMemo(() => {
     if (!dfsResult) return new Set<string>();
     const set = new Set<string>();
     for (let i = 0; i < step; i++) {
       const e = dfsResult.edgeStepsFromStart[i];
-      if (e) set.add(`${e.from}->${e.to}`);
+      if (!e) continue;
+      set.add(`${e.from}->${e.to}`);
+      if (!directed) set.add(`${e.to}->${e.from}`);
     }
     return set;
-  }, [dfsResult, step]);
+  }, [dfsResult, step, directed]);
 
   const visitedVertices = useMemo(() => {
     if (!dfsResult) return new Set<string>();
@@ -525,11 +530,12 @@ export default function GraphPlayground() {
                 const key = `${e.from}->${e.to}`;
                 const isTraversed = traversedEdges.has(key);
                 const isCurrent =
-                  currentEdge &&
-                  currentEdge.from === e.from &&
-                  currentEdge.to === e.to &&
+                  !!currentEdge &&
                   step > 0 &&
-                  traversedEdges.has(key);
+                  ((currentEdge.from === e.from && currentEdge.to === e.to) ||
+                    (!directed &&
+                      currentEdge.from === e.to &&
+                      currentEdge.to === e.from));
                 const isHovered = hoverEdgeIdx === i || menuEdgeIdx === i;
                 const { x1, y1, x2, y2 } = trimToCircle(a, b, VERTEX_R + 2);
                 const stroke = isCurrent
