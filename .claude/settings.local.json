@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /home/manja/Portfolio/services/portfolio-service-graphs -type f \\\\\\( -name '*.hpp' -o -name '*.cpp' -o -name '*.h' \\\\\\) -not -path '*/third_party/*' -not -path '*/build/*' -not -path '*/node_modules/*' | sort)",
+      "Read(//home/manja/Portfolio/services/portfolio-service-graphs/**)"
+    ]
+  }
+}
